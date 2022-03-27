@@ -1,17 +1,15 @@
 package banking;
 
-import java.sql.SQLException;
 import java.util.Scanner;
 
 public class Main {
 
     public static String cardNumberCheck;
     public static String pinNumberCheck;
-    public static String cardNumberToTransfer;
 
     static Scanner scanner = new Scanner(System.in);
 
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) {
 
         Account account = new Account(args[1]);
         CardDatabaseSqlite dao = new CardDatabaseSqlite(args[1]);
@@ -62,11 +60,11 @@ public class Main {
 
                             switch (selectAccountMenu) {
                                 case "1": //Balance
-                                    System.out.println(dao.getBalance(account));
+                                    System.out.println(dao.getBalance());
                                     break;
                                 case "2": //add income
                                     System.out.println("Enter income: ");
-                                    dao.updateBalanceToAccount(account, scanner.nextInt());
+                                    dao.updateBalanceToAccount(scanner.nextInt());
                                     System.out.println("Income was added!");
 
                                     break;
@@ -84,8 +82,8 @@ public class Main {
 
                                         System.out.println("Enter how much money you want to transfer: ");
                                         int amountToTransfer = scanner.nextInt();
-                                        if (dao.getBalance(account) >= amountToTransfer) {
-                                            dao.executeTransferFromAccount(account, amountToTransfer);
+                                        if (dao.getBalance() >= amountToTransfer) {
+                                            dao.executeTransferFromAccount(amountToTransfer);
                                             dao.updateTransferToAccount(cardNumberToTransfer, amountToTransfer);
                                             System.out.println("Success!");
                                         } else {

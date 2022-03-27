@@ -12,7 +12,7 @@ import java.util.Map;
 import static banking.Main.*;
 
 public class CardDatabaseSqlite {
-    private String fileName; //ne treba definirati ime fileName-a jer je definiran u argumentima aplikacije
+    private final String fileName; //ne treba definirati ime fileName-a jer je definiran u argumentima aplikacije
     Map<Integer, Account> acc = new HashMap<>();
 
     // konekcija prema bazi
@@ -52,12 +52,7 @@ public class CardDatabaseSqlite {
         }
     }
 
-    String getFileName() {
-        return this.fileName;
-    }
-
-
-    public void insertAccountInTable(Account account) throws SQLException {
+    public void insertAccountInTable(Account account) {
         String sql = "INSERT INTO card (number, pin, balance) VALUES (?, ?, ?)";
 
         try (Connection connection = connectToDatabase(fileName);
@@ -101,7 +96,7 @@ public class CardDatabaseSqlite {
         return acc;
     }
 
-    public void updateBalanceToAccount(Account account, int incomeAmount) {
+    public void updateBalanceToAccount(int incomeAmount) {
         String sql = "UPDATE card SET balance = balance + ? WHERE number = ?";
 
         try (Connection connection = connectToDatabase(fileName);
@@ -114,7 +109,7 @@ public class CardDatabaseSqlite {
         }
     }
 
-    public int getBalance(Account account) {
+    public int getBalance() {
 
         String sql = "SELECT balance FROM card WHERE number = ?";
 
@@ -174,7 +169,7 @@ public class CardDatabaseSqlite {
         return false;
     }
 
-    public void executeTransferFromAccount(Account account, int amountToTransfer) {
+    public void executeTransferFromAccount(int amountToTransfer) {
         Connection connection = connectToDatabase(fileName);
         String sql = "UPDATE card SET balance = balance - ? WHERE number = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
