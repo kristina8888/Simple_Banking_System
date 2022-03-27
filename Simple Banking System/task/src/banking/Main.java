@@ -1,109 +1,140 @@
 package banking;
 
+import java.sql.SQLException;
 import java.util.Scanner;
-
-import static banking.Account.accountMap;
 
 public class Main {
 
     public static String cardNumberCheck;
     public static String pinNumberCheck;
+    public static String cardNumberToTransfer;
 
     static Scanner scanner = new Scanner(System.in);
 
-    public static boolean checkPin() {
-        boolean isCheckPin = false;
+    public static void main(String[] args) throws SQLException {
 
-        for (String a : accountMap.keySet()) {
-            if (accountMap.get(a).getNewCardNumber().equals(cardNumberCheck) && accountMap.get(a).getNewPin().equals(pinNumberCheck)) {
-                isCheckPin = true;
-            } else {
-                isCheckPin = false;
-            }
-        }
-        return isCheckPin;
-    }
+        Account account = new Account(args[1]);
+        CardDatabaseSqlite dao = new CardDatabaseSqlite(args[1]);
 
-    public static void mainMenuSelect() {
-        System.out.println("1. Create an account \n" +
-                "2. Log into account \n" +
-                "0. Exit");
-    }
+        String selectStartMenu = " ";
 
-    public static void main(String[] args) {
+        while (!selectStartMenu.equals("0")) {
 
-        Account account = new Account();
+            startMenu();
+            selectStartMenu = scanner.next();
 
-        String mainMenuSelect = " ";
-
-        while (!mainMenuSelect.equals("0")) {
-
-            mainMenuSelect();
-
-            mainMenuSelect = scanner.next();
-
-            switch (mainMenuSelect) {
-                case "1":
+            switch (selectStartMenu) {
+                case "1": //create new card
                     System.out.println("Your card has been created");
                     account.createNewCardNumber();
                     System.out.println("Your card number:");
                     System.out.println(account.getNewCardNumber());
                     account.crateNewPin();
                     System.out.println("Your card PIN:");
-                    accountMap.put(account.getNewCardNumber(), account);
+                    dao.insertAccountInTable(account);
+                    dao.listAll().put(account.getId(), account);
                     System.out.println(account.getNewPin());
                     break;
 
-                case "2":
+                case "2": // log into account
                     System.out.println("Enter your card number:");
                     cardNumberCheck = scanner.next();
                     System.out.println("Enter your PIN:");
                     pinNumberCheck = scanner.next();
 
-                    if (!checkPin()) {
-                        System.out.println("Wrong card number or PIN!");
-                    }
-                    if (checkPin()) {
+                    if (!dao.checkLogInAccount()) {
+                        System.out.println("Wrong card number or PIN number!");
+                    } else if (dao.checkLogInAccount()) {
                         System.out.println("You have successfully logged in!");
 
-                        String accountMenuSelect = "";
+                        String selectAccountMenu = "";
 
-                        label:
-                        while (!accountMenuSelect.equals("0")) {
+                        while (!selectAccountMenu.equals("0")) {
 
                             System.out.println("1. Balance \n" +
-                                    "2. Log out \n" +
+                                    "2. Add income \n" +
+                                    "3. Do transfer \n" +
+                                    "4. Close account \n" +
+                                    "5. Log out \n" +
                                     "0. Exit");
 
-                            accountMenuSelect = scanner.next();
-                            boolean exit = false;
+                            selectAccountMenu = scanner.next();
 
-                            switch (accountMenuSelect) {
-                                case "1":
-                                    System.out.println("Balance: 0");
-                                    exit = false;
+                            switch (selectAccountMenu) {
+                                case "1": //Balance
+                                    System.out.println(dao.getBalance(account));
                                     break;
-                                case "2":
+                                case "2": //add income
+                                    System.out.println("Enter income: ");
+                                    dao.updateBalanceToAccount(account, scanner.nextInt());
+                                    System.out.println("Income was added!");
+
+                                    break;
+                                case "3": //do transfer
+                                    System.out.println("Enter card number: ");
+                                    String cardNumberToTransfer = scanner.next();
+
+                                    if (!account.checkLuhnAlgorithm(cardNumberToTransfer)) {
+                                        System.out.println("Probably you made a mistake in the card number. Please try again!");
+                                    } else if (!dao.checkCardExist(cardNumberToTransfer)) {
+                                        System.out.println("Such card does not exist.");
+                                    } else if (cardNumberCheck.equals(cardNumberToTransfer)) {
+                                        System.out.println("You can't transfer money to the same account!");
+                                    } else if (dao.checkCardExist(cardNumberToTransfer)) {
+
+                                        System.out.println("Enter how much money you want to transfer: ");
+                                        int amountToTransfer = scanner.nextInt();
+                                        if (dao.getBalance(account) >= amountToTransfer) {
+                                            dao.executeTransferFromAccount(account, amountToTransfer);
+                                            dao.updateTransferToAccount(cardNumberToTransfer, amountToTransfer);
+                                            System.out.println("Success!");
+                                        } else {
+                                            System.out.println("Not enough money!");
+                                        }
+
+                                    } else {
+                                        System.out.println("Wrong input");
+                                    }
+
+                                    break;
+                                case "4": //Close account
+                                    dao.deleteAccount(cardNumberCheck);
+                                    System.out.println("The account has been closed!");
+                                    selectAccountMenu = "0";
+                                    break;
+                                case "5": //Log out
                                     System.out.println("You have successfully logged out!");
-                                    exit = true;
-                                    mainMenuSelect();
-                                    break label;
-                                case "0":
+                                    selectAccountMenu = "0";
+                                    break;
+                                case "0": // exit program
                                     System.out.println("Bye!");
-                                    exit = true;
-                                    mainMenuSelect();
-                                    break label;
+                                    selectStartMenu = "0";
+                                    break;
                                 default:
                                     System.out.println("Wrong input!");
+                                    break;
                             }
                         }
+                    } else {
+                        System.out.println("Wrong input!");
                     }
+
+                    break;
                 case "0":
                     System.out.println("Bye!");
                     break;
                 default:
-                    throw new IllegalStateException("Unexpected value: " + mainMenuSelect);
+                    System.out.println("Wrong input!");
+                    break;
+
             }
         }
     }
+
+    public static void startMenu() {
+        System.out.println("1. Create an account \n" +
+                "2. Log into account \n" +
+                "0. Exit");
+    }
+
 }

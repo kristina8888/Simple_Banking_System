@@ -8,8 +8,49 @@ public class Account {
 
     private String cardNumber;
     private String pin;
-    static Map<String, Account> accountMap = new HashMap<>();
+    private int balance;
+    private int id;
 
+    public Account() {
+        this.cardNumber = cardNumber;
+        this.pin = pin;
+        this.balance = balance;
+    }
+
+    public Account(String arg) {
+
+    }
+
+    public void setCardNumber(String cardNumber) {
+        this.cardNumber = cardNumber;
+    }
+
+    public void setPin(String pin) {
+        this.pin = pin;
+    }
+
+    public Account(String cardNumber, String pin, int balance) {
+        this.cardNumber = cardNumber;
+        this.pin = pin;
+        this.balance = balance;
+    }
+
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setBalance(int balance) {
+        this.balance = balance;
+    }
+
+    public int getBalance() {
+        return balance;
+    }
 
     public String getNewCardNumber() {
         return cardNumber;
@@ -48,5 +89,23 @@ public class Account {
         pin = String.valueOf(random.nextInt(upper - lower + 1) + lower);
 
         return pin;
+    }
+
+    public boolean checkLuhnAlgorithm(String cardNumberCheck) {
+        int sum = 0;
+        boolean alternate = false;
+        for (int i = cardNumberCheck.length() - 1; i >= 0; i--)
+        {
+            int n = Integer.parseInt(cardNumberCheck.substring(i, i + 1));
+            if (alternate) {
+                n *= 2;
+                if (n > 9) {
+                    n = (n % 10) + 1;
+                }
+            }
+            sum += n;
+            alternate = !alternate;
+        }
+        return (sum % 10 == 0);
     }
 }
