@@ -4,9 +4,6 @@ import java.util.Scanner;
 
 public class Main {
 
-    public static String cardNumberCheck;
-    public static String pinNumberCheck;
-
     static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -15,6 +12,9 @@ public class Main {
         CardDatabaseSqlite dao = new CardDatabaseSqlite(args[1]);
 
         String selectStartMenu = " ";
+        String cardNumberCheck;
+        String pinNumberCheck;
+        int money;
 
         while (!selectStartMenu.equals("0")) {
 
@@ -40,9 +40,9 @@ public class Main {
                     System.out.println("Enter your PIN:");
                     pinNumberCheck = scanner.next();
 
-                    if (!dao.checkLogInAccount()) {
+                    if (!dao.checkLogInAccount(cardNumberCheck, pinNumberCheck)) {
                         System.out.println("Wrong card number or PIN number!");
-                    } else if (dao.checkLogInAccount()) {
+                    } else if (dao.checkLogInAccount(cardNumberCheck, pinNumberCheck)) {
                         System.out.println("You have successfully logged in!");
 
                         String selectAccountMenu = "";
@@ -60,11 +60,12 @@ public class Main {
 
                             switch (selectAccountMenu) {
                                 case "1": //Balance
-                                    System.out.println(dao.getBalance());
+                                    System.out.println(dao.printCurrentBalance(cardNumberCheck));
                                     break;
                                 case "2": //add income
                                     System.out.println("Enter income: ");
-                                    dao.updateBalanceToAccount(scanner.nextInt());
+                                    money = scanner.nextInt();
+                                    dao.updateBalanceOnAccount(money, cardNumberCheck);
                                     System.out.println("Income was added!");
 
                                     break;
@@ -81,10 +82,10 @@ public class Main {
                                     } else if (dao.checkCardExist(cardNumberToTransfer)) {
 
                                         System.out.println("Enter how much money you want to transfer: ");
-                                        int amountToTransfer = scanner.nextInt();
-                                        if (dao.getBalance() >= amountToTransfer) {
-                                            dao.executeTransferFromAccount(amountToTransfer);
-                                            dao.updateTransferToAccount(cardNumberToTransfer, amountToTransfer);
+                                        money = scanner.nextInt();
+                                        if (dao.printCurrentBalance(cardNumberCheck) >= money) {
+                                            dao.updateBalanceOnAccount(-money, cardNumberCheck);
+                                            dao.updateBalanceOnAccount(money, cardNumberToTransfer);
                                             System.out.println("Success!");
                                         } else {
                                             System.out.println("Not enough money!");
@@ -124,7 +125,6 @@ public class Main {
                 default:
                     System.out.println("Wrong input!");
                     break;
-
             }
         }
     }
@@ -134,5 +134,4 @@ public class Main {
                 "2. Log into account \n" +
                 "0. Exit");
     }
-
 }

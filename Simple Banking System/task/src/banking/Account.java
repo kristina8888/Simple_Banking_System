@@ -15,7 +15,6 @@ public class Account {
     }
 
     public Account(String arg) {
-
     }
 
     public void setCardNumber(String cardNumber) {
@@ -51,7 +50,7 @@ public class Account {
         return pin;
     }
 
-    public void createNewCardNumber() {
+    public String createNewCardNumber() {
         String bin = "400000";
         int lowerAccNr = 100000000;
         int upperAccNr = 999999999;
@@ -63,14 +62,14 @@ public class Account {
 
         for (int i = digits.length() - 1; i >= 0; --i) {
             int digit = Character.getNumericValue(digits.charAt(i));
-            digit = (alternate == !alternate) ? (digit * 2) : digit;
+            digit = (alternate = !alternate) ? (digit * 2) : digit;
             digit = (digit > 9) ? (digit - 9) : digit;
             sum += digit;
         }
         int lastDigit = (sum * 9) % 10;
 
-        cardNumber = digits + lastDigit;
-
+        cardNumber = digits + String.valueOf(lastDigit);
+        return cardNumber;
     }
 
     public void crateNewPin() {
@@ -83,8 +82,7 @@ public class Account {
     public boolean checkLuhnAlgorithm(String cardNumberCheck) {
         int sum = 0;
         boolean alternate = false;
-        for (int i = cardNumberCheck.length() - 1; i >= 0; i--)
-        {
+        for (int i = cardNumberCheck.length() - 1; i >= 0; i--) {
             int n = Integer.parseInt(cardNumberCheck.substring(i, i + 1));
             if (alternate) {
                 n *= 2;
