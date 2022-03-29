@@ -76,7 +76,6 @@ public class Account {
         int lower = 1000;
         int upper = 9999;
         pin = String.valueOf(random.nextInt(upper - lower + 1) + lower);
-
     }
 
     public boolean checkLuhnAlgorithm(String cardNumberCheck) {
