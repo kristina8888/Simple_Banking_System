@@ -25,13 +25,16 @@ public class Main {
                 case "1": //create new card
                     System.out.println("Your card has been created");
                     account.createNewCardNumber();
+
                     System.out.println("Your card number:");
                     System.out.println(account.getNewCardNumber());
+
                     account.crateNewPin();
                     System.out.println("Your card PIN:");
+                    System.out.println(account.getNewPin());
+
                     dao.insertAccountInTable(account);
                     dao.listAll().put(account.getId(), account);
-                    System.out.println(account.getNewPin());
                     break;
 
                 case "2": // log into account
@@ -67,7 +70,6 @@ public class Main {
                                     money = scanner.nextInt();
                                     dao.updateBalanceOnAccount(money, cardNumberCheck);
                                     System.out.println("Income was added!");
-
                                     break;
                                 case "3": //do transfer
                                     System.out.println("Enter card number: ");
@@ -94,7 +96,6 @@ public class Main {
                                     } else {
                                         System.out.println("Wrong input");
                                     }
-
                                     break;
                                 case "4": //Close account
                                     dao.deleteAccount(cardNumberCheck);
